@@ -1,0 +1,32 @@
+============================================================
+MODEL EVALUATION REPORT
+Model:       LightGBM
+Date:        2026-04-05
+Dataset:     12,000 synthetic product records
+             (Flipkart + Amazon style, 3,000 per tier)
+============================================================
+
+  Accuracy       : 0.9706  (97.1%)
+  F1-Macro       : 0.9706
+  ROC-AUC (OvR)  : 0.9993
+
+Per-class breakdown
+------------------------------------------------------------
+              precision    recall  f1-score   support
+
+      budget       0.98      0.98      0.98      1750
+   mid-range       0.96      0.96      0.96      1750
+     premium       0.97      0.96      0.96      1750
+      luxury       0.98      0.98      0.98      1750
+
+    accuracy                           0.97      7000
+   macro avg       0.97      0.97      0.97      7000
+weighted avg       0.97      0.97      0.97      7000
+
+============================================================
+
+Note: Labels are assigned via percentile-based price binning
+  Budget   : 0–25th percentile
+  Mid-Range: 25–50th percentile
+  Premium  : 50–75th percentile
+  Luxury   : 75–100th percentile

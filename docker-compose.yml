@@ -1,0 +1,93 @@
+# ============================================================
+# Product Price Category Predictor - Docker Compose
+# ============================================================
+#
+# Services:
+#   ml   - Python Flask ML micro-service  (port 5001)
+#   web  - Ruby on Rails web application  (port 3000)
+#
+# Quick start:
+#   cp .env.example .env          # fill in KAGGLE_USERNAME / KAGGLE_KEY
+#   docker compose up --build
+#
+# The ML service runs the full pipeline on first boot:
+#   download_data  ->  preprocess  ->  train  ->  serve
+# Subsequent boots skip data download/training (volumes are persisted).
+# ============================================================
+version: "3.9"
+
+services:
+
+  # -- Python ML micro-service ------------------------------
+  ml:
+    build:
+      context: ./ml
+      dockerfile: Dockerfile
+    container_name: price_predictor_ml
+    restart: unless-stopped
+    ports:
+      - "${ML_PORT:-5001}:5001"
+    volumes:
+      # Source code (live-reload in dev)
+      - ./ml:/app
+      # Persist trained models between container restarts
+      - ml_models:/app/models
+      # Persist downloaded datasets
+      - ml_data:/app/data
+    env_file:
+      - .env.example          # override with .env in production
+    environment:
+      ML_PORT: "${ML_PORT:-5001}"
+      PYTHONUNBUFFERED: "1"
+      KAGGLE_USERNAME: "${KAGGLE_USERNAME:-}"
+      KAGGLE_KEY: "${KAGGLE_KEY:-}"
+    command: >
+      sh -c "
+        python download_data.py &&
+        python preprocess.py   &&
+        python train.py        &&
+        python predict_service.py
+      "
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 180s     # training can take a few minutes on first run
+
+  # -- Ruby on Rails web app ---------------------------------
+  web:
+    build:
+      context: ./price_predictor
+      dockerfile: Dockerfile
+    container_name: price_predictor_web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      ml:
+        condition: service_healthy
+    environment:
+      RAILS_ENV: "production"
+      ML_SERVICE_URL: "http://ml:${ML_PORT:-5001}"
+      RAILS_MASTER_KEY: "${RAILS_MASTER_KEY}"
+      RAILS_LOG_TO_STDOUT: "true"
+    volumes:
+      - rails_storage:/rails/storage
+      - rails_log:/rails/log
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:3000/up"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  ml_models:
+    driver: local
+  ml_data:
+    driver: local
+  rails_storage:
+    driver: local
+  rails_log:
+    driver: local
