@@ -1,0 +1,146 @@
+{
+  "pipeline": "mock_training_pipeline_v1",
+  "dataset": {
+    "total_samples": 35000,
+    "train_samples": 28000,
+    "test_samples": 7000,
+    "features": 513,
+    "classes": [
+      "budget",
+      "mid-range",
+      "premium",
+      "luxury"
+    ],
+    "class_distribution": {
+      "premium": 8750,
+      "luxury": 8750,
+      "budget": 8750,
+      "mid-range": 8750
+    }
+  },
+  "best_model": {
+    "name": "LightGBM",
+    "accuracy": 0.9706,
+    "f1_macro": 0.9706,
+    "f1_weighted": 0.9706,
+    "roc_auc": 0.9993,
+    "confusion_matrix": [
+      [
+        1714,
+        36,
+        0,
+        0
+      ],
+      [
+        40,
+        1680,
+        30,
+        0
+      ],
+      [
+        0,
+        35,
+        1678,
+        37
+      ],
+      [
+        0,
+        1,
+        27,
+        1722
+      ]
+    ],
+    "per_class": {
+      "budget": {
+        "precision": 0.9772,
+        "recall": 0.9794,
+        "f1-score": 0.9783,
+        "support": 1750.0
+      },
+      "mid-range": {
+        "precision": 0.9589,
+        "recall": 0.96,
+        "f1-score": 0.9595,
+        "support": 1750.0
+      },
+      "premium": {
+        "precision": 0.9671,
+        "recall": 0.9589,
+        "f1-score": 0.963,
+        "support": 1750.0
+      },
+      "luxury": {
+        "precision": 0.979,
+        "recall": 0.984,
+        "f1-score": 0.9815,
+        "support": 1750.0
+      },
+      "macro avg": {
+        "precision": 0.9706,
+        "recall": 0.9706,
+        "f1-score": 0.9706,
+        "support": 7000.0
+      },
+      "weighted avg": {
+        "precision": 0.9706,
+        "recall": 0.9706,
+        "f1-score": 0.9706,
+        "support": 7000.0
+      }
+    }
+  },
+  "all_models": [
+    {
+      "name": "LogisticRegression",
+      "accuracy": 0.9663,
+      "f1_macro": 0.9663,
+      "f1_weighted": 0.9663,
+      "roc_auc": 0.9992
+    },
+    {
+      "name": "RandomForest",
+      "accuracy": 0.9704,
+      "f1_macro": 0.9704,
+      "f1_weighted": 0.9704,
+      "roc_auc": 0.9992
+    },
+    {
+      "name": "XGBoost",
+      "accuracy": 0.9689,
+      "f1_macro": 0.9688,
+      "f1_weighted": 0.9688,
+      "roc_auc": 0.9993
+    },
+    {
+      "name": "LightGBM",
+      "accuracy": 0.9706,
+      "f1_macro": 0.9706,
+      "f1_weighted": 0.9706,
+      "roc_auc": 0.9993
+    }
+  ],
+  "thresholds": {
+    "p25": 91.495,
+    "p50": 200.07,
+    "p75": 436.615,
+    "labels": [
+      "budget",
+      "mid-range",
+      "premium",
+      "luxury"
+    ]
+  },
+  "feature_engineering": {
+    "tfidf_features": 1000,
+    "tfidf_ngram_range": "(1, 2)",
+    "structured_features": [
+      "rating",
+      "log_review_count"
+    ],
+    "categorical_features": [
+      "category (top-20 one-hot)",
+      "source (one-hot)"
+    ],
+    "oversampling": "SMOTE"
+  }
+}
