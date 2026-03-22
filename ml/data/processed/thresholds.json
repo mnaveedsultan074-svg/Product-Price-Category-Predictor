@@ -1,0 +1,11 @@
+{
+  "p25": 91.495,
+  "p50": 200.07,
+  "p75": 436.615,
+  "labels": [
+    "budget",
+    "mid-range",
+    "premium",
+    "luxury"
+  ]
+}
