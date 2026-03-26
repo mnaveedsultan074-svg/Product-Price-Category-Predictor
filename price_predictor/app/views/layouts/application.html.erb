@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title><%= content_for?(:title) ? yield(:title) : "PriceTier AI — Product Price Category Predictor" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="bg-gray-50 min-h-screen font-sans antialiased">
+
+    <!-- Navigation -->
+    <nav class="bg-gradient-to-r from-indigo-700 via-purple-700 to-pink-600 shadow-lg">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+
+          <!-- Logo / Brand -->
+          <div class="flex items-center gap-3">
+            <div class="bg-white/20 rounded-xl p-2">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+              </svg>
+            </div>
+            <%= link_to root_path, class: "text-white font-bold text-lg tracking-tight" do %>
+              PriceTier<span class="text-pink-200 font-light">AI</span>
+            <% end %>
+          </div>
+
+          <!-- Nav Links -->
+          <div class="hidden md:flex items-center gap-1">
+            <%= link_to "Predict", root_path,
+              class: "text-white/90 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150" %>
+            <%= link_to "History", history_predictions_path,
+              class: "text-white/90 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150" %>
+            <%= link_to "Model Info", model_info_predictions_path,
+              class: "text-white/90 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150" %>
+          </div>
+
+          <!-- Mobile menu button -->
+          <div class="md:hidden">
+            <button id="mobile-menu-btn" class="text-white/80 hover:text-white p-2 rounded-lg">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+              </svg>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Mobile menu -->
+      <div id="mobile-menu" class="hidden md:hidden border-t border-white/20 px-4 py-3 space-y-1">
+        <%= link_to "Predict", root_path, class: "block text-white/90 hover:text-white px-3 py-2 rounded-lg text-sm font-medium" %>
+        <%= link_to "History", history_predictions_path, class: "block text-white/90 hover:text-white px-3 py-2 rounded-lg text-sm font-medium" %>
+        <%= link_to "Model Info", model_info_predictions_path, class: "block text-white/90 hover:text-white px-3 py-2 rounded-lg text-sm font-medium" %>
+      </div>
+    </nav>
+
+    <!-- Flash messages -->
+    <% if flash[:error].present? %>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
+          <svg class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <div>
+            <p class="text-red-800 text-sm font-medium">Error</p>
+            <p class="text-red-700 text-sm mt-0.5"><%= flash[:error] %></p>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <% if flash[:notice].present? %>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        <div class="bg-green-50 border border-green-200 rounded-xl p-4">
+          <p class="text-green-800 text-sm"><%= flash[:notice] %></p>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Main content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <%= yield %>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-16 border-t border-gray-200 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="text-center md:text-left">
+            <p class="text-gray-800 font-semibold text-sm">Product Price Category Predictor</p>
+            <p class="text-gray-500 text-xs mt-1">Dissertation Project — Muhammad Naveed Sultan</p>
+          </div>
+          <div class="flex items-center gap-6 text-xs text-gray-400">
+            <span>ML Models: LR · RF · XGBoost · LightGBM</span>
+            <span class="hidden md:inline">|</span>
+            <span>Explainability: SHAP</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById('mobile-menu-btn')?.addEventListener('click', function() {
+        document.getElementById('mobile-menu')?.classList.toggle('hidden');
+      });
+    </script>
+
+  </body>
+</html>
