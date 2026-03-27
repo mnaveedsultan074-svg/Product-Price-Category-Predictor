@@ -1,0 +1,273 @@
+<% content_for :title, "Result - PriceTier AI" %>
+<%
+  tier              = @result["prediction"] || "unknown"
+  confidence        = @result["confidence_pct"]
+  confidence_scores = @result["confidence_scores"] || {}
+  shap_features     = @result["shap_features"] || []
+  tier_desc         = @result["tier_description"] || ""
+  explanation       = @result["explanation"] || ""
+  model_used        = @result["model_used"] || "unknown"
+  thresholds        = @result["thresholds"] || {}
+
+  gradient = { "budget"=>"from-green-400 to-emerald-600", "mid-range"=>"from-blue-400 to-indigo-600",
+               "premium"=>"from-amber-400 to-orange-600", "luxury"=>"from-purple-400 to-pink-600"
+             }.fetch(tier, "from-gray-400 to-gray-600")
+
+  bar_cls  = { "budget"=>"bg-green-500", "mid-range"=>"bg-blue-500",
+               "premium"=>"bg-amber-500", "luxury"=>"bg-purple-500" }
+  text_cls = { "budget"=>"text-green-600", "mid-range"=>"text-blue-600",
+               "premium"=>"text-amber-600","luxury"=>"text-purple-600" }
+  badge_cls = { "budget"    => "bg-green-100 text-green-700 border border-green-200",
+                "mid-range" => "bg-blue-100 text-blue-700 border border-blue-200",
+                "premium"   => "bg-amber-100 text-amber-700 border border-amber-200",
+                "luxury"    => "bg-purple-100 text-purple-700 border border-purple-200" }
+%>
+
+<!-- Back link -->
+<div class="mb-6">
+  <%= link_to predictions_path,
+        class: "inline-flex items-center gap-2 text-gray-500 hover:text-indigo-600 text-sm font-medium" do %>
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+    </svg>
+    New Prediction
+  <% end %>
+</div>
+
+<!-- ======================================================
+     RESULT HERO CARD
+     ====================================================== -->
+<div class="bg-white rounded-3xl shadow-xl shadow-gray-200/60 border border-gray-100 overflow-hidden mb-8">
+
+  <!-- Gradient header -->
+  <div class="bg-gradient-to-r <%= gradient %> px-8 py-10 text-white">
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div>
+        <p class="text-white/75 text-xs font-semibold uppercase tracking-widest mb-2">Price Tier Prediction</p>
+        <h1 class="text-5xl font-black capitalize tracking-tight"><%= tier %></h1>
+        <p class="text-white/90 mt-3 text-base max-w-lg leading-relaxed"><%= tier_desc %></p>
+      </div>
+
+      <% if confidence %>
+        <div class="text-center flex-shrink-0">
+          <div class="relative inline-flex items-center justify-center w-28 h-28 rounded-full
+                      bg-white/20 ring-4 ring-white/30">
+            <div class="text-center">
+              <span class="text-3xl font-black text-white"><%= confidence.to_i %></span><span class="text-white/80 text-base">%</span>
+              <div class="text-white/60 text-xs mt-0.5">confidence</div>
+            </div>
+          </div>
+          <p class="text-white/50 text-xs mt-2">Model: <%= model_used %></p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- -- Confidence Scores -- -->
+  <% if confidence_scores.any? %>
+    <div class="px-8 py-6 border-b border-gray-100">
+      <h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-5">Confidence by Tier</h2>
+      <div class="space-y-3">
+        <% ["budget", "mid-range", "premium", "luxury"].each do |t| %>
+          <% score      = confidence_scores[t].to_f
+             is_pred    = (t == tier)
+             bar        = bar_cls.fetch(t, "bg-gray-400")
+             ttext      = text_cls.fetch(t, "text-gray-600")
+             fill_width = [score.round(1), 100].min
+          %>
+          <div class="flex items-center gap-3">
+            <div class="w-24 text-right flex-shrink-0">
+              <span class="text-xs font-semibold capitalize <%= is_pred ? ttext : 'text-gray-400' %>">
+                <%= t %><%= is_pred ? " [OK]" : "" %>
+              </span>
+            </div>
+            <div class="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
+              <div class="h-full rounded-full flex items-center justify-end pr-2 <%= bar %>"
+                   style="width: <%= fill_width %>%">
+                <% if fill_width >= 15 %>
+                  <span class="text-white text-xs font-bold"><%= score %>%</span>
+                <% end %>
+              </div>
+            </div>
+            <% if fill_width < 15 %>
+              <span class="text-xs text-gray-500 w-10 flex-shrink-0 text-right"><%= score %>%</span>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- -- AI Explanation -- -->
+  <% if explanation.present? %>
+    <div class="px-8 py-5 bg-indigo-50/50 border-b border-gray-100">
+      <div class="flex items-start gap-3">
+        <div class="bg-indigo-100 rounded-lg p-2 flex-shrink-0 mt-0.5">
+          <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-indigo-800">AI Explanation</p>
+          <p class="text-sm text-indigo-700 mt-0.5 leading-relaxed"><%= explanation %></p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- -- Price Tier Thresholds -- -->
+  <% if thresholds.any? %>
+    <div class="px-8 py-6">
+      <h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">
+        Training-Data Price Thresholds
+      </h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <% [
+          { label: "Budget",     range: "up to #{thresholds['p25']&.round(0).to_i}",                                                          colour: "green"  },
+          { label: "Mid-Range",  range: "#{thresholds['p25']&.round(0).to_i} - #{thresholds['p50']&.round(0).to_i}", colour: "blue"   },
+          { label: "Premium",    range: "#{thresholds['p50']&.round(0).to_i} - #{thresholds['p75']&.round(0).to_i}", colour: "amber"  },
+          { label: "Luxury",     range: "above #{thresholds['p75']&.round(0).to_i}",                                                          colour: "purple" }
+        ].each do |pt| %>
+          <%
+            bg2  = { "green"=>"bg-green-50 border border-green-100",  "blue"=>"bg-blue-50 border border-blue-100",
+                     "amber"=>"bg-amber-50 border border-amber-100",  "purple"=>"bg-purple-50 border border-purple-100" }[pt[:colour]]
+            ht2  = { "green"=>"text-green-700","blue"=>"text-blue-700","amber"=>"text-amber-700","purple"=>"text-purple-700" }[pt[:colour]]
+          %>
+          <div class="text-center p-3 rounded-xl <%= bg2 %>">
+            <div class="text-xs font-bold uppercase tracking-wide <%= ht2 %>"><%= pt[:label] %></div>
+            <div class="text-xs text-gray-500 mt-1"><%= pt[:range] %></div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+</div>
+
+<!-- ======================================================
+     SHAP FEATURE IMPORTANCE
+     ====================================================== -->
+<% if shap_features.any? %>
+  <% max_abs = shap_features.map { |f| f["shap_value"].to_f.abs }.max.then { |m| m.zero? ? 1.0 : m } %>
+  <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/60 border border-gray-100 overflow-hidden mb-8">
+
+    <div class="px-8 py-6 border-b border-gray-100 bg-gradient-to-r from-slate-50 to-gray-50">
+      <div class="flex items-center gap-3">
+        <div class="bg-slate-700 rounded-xl p-2">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-lg font-bold text-gray-800">SHAP Feature Importance</h2>
+          <p class="text-gray-500 text-sm">Top features that influenced this prediction (SHapley Additive exPlanations).</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-8 py-6">
+      <div class="space-y-3">
+        <% shap_features.each_with_index do |feat, idx| %>
+          <% val      = feat["shap_value"].to_f
+             abs_val  = val.abs
+             bar_pct  = (abs_val / max_abs * 100).round(1).clamp(0, 100)
+             positive = val >= 0
+             raw_name = feat["feature"].to_s
+             # Friendly label
+             label = case raw_name
+               when "rating"          then "Product Rating"
+               when "log_review"      then "Review Count (log)"
+               when /^cat_(.+)/       then "Category: #{$1.tr('_',' ')}"
+               when /^src_(.+)/       then "Source: #{$1.capitalize}"
+               when /^feature_(\d+)$/ then "Text Feature ##{$1}"
+               else raw_name.tr('_',' ').truncate(28)
+             end
+          %>
+          <div class="flex items-center gap-3">
+            <div class="w-6 text-center flex-shrink-0">
+              <span class="text-xs font-bold text-gray-300">#<%= idx + 1 %></span>
+            </div>
+            <div class="w-44 flex-shrink-0">
+              <span class="text-xs font-medium text-gray-700 block truncate" title="<%= raw_name %>">
+                <%= label %>
+              </span>
+            </div>
+            <div class="flex-1 bg-gray-100 rounded-full h-5 overflow-hidden">
+              <div class="h-full rounded-full flex items-center justify-end pr-2
+                          <%= positive ? 'shap-bar-positive' : 'shap-bar-negative' %>"
+                   style="width:<%= bar_pct %>%">
+                <% if bar_pct > 28 %>
+                  <span class="text-white text-xs font-bold"><%= val.round(3) %></span>
+                <% end %>
+              </div>
+            </div>
+            <% if bar_pct <= 28 %>
+              <div class="w-16 text-right flex-shrink-0">
+                <span class="text-xs font-mono <%= positive ? 'text-indigo-600' : 'text-rose-500' %>">
+                  <%= positive ? "+" : "" %><%= val.round(3) %>
+                </span>
+              </div>
+            <% end %>
+            <div class="flex-shrink-0 w-5">
+              <% if positive %>
+                <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-100 text-indigo-600 text-xs font-bold">+</span>
+              <% else %>
+                <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-rose-100 text-rose-500 text-xs font-bold">-</span>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="mt-5 flex flex-wrap items-center gap-5 text-xs text-gray-500">
+        <div class="flex items-center gap-1.5">
+          <div class="w-3 h-3 rounded shap-bar-positive"></div>
+          <span>Pushes toward predicted tier</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <div class="w-3 h-3 rounded shap-bar-negative"></div>
+          <span>Pulls away from predicted tier</span>
+        </div>
+        <span class="text-gray-400">Bar width = relative magnitude</span>
+      </div>
+    </div>
+  </div>
+<% else %>
+  <div class="bg-amber-50 border border-amber-100 rounded-2xl px-6 py-5 mb-8 flex items-center gap-3">
+    <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <p class="text-amber-700 text-sm">
+      SHAP explainability data was not returned by the model.
+      This can happen if the SHAP explainer failed to build during training.
+    </p>
+  </div>
+<% end %>
+
+<!-- ======================================================
+     ACTION BUTTONS
+     ====================================================== -->
+<div class="flex flex-col sm:flex-row gap-4">
+  <%= link_to predictions_path,
+        class: "flex-1 text-center bg-gradient-to-r from-indigo-600 to-purple-600
+                hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-6
+                rounded-2xl transition-all duration-200 shadow-lg shadow-indigo-200
+                hover:shadow-indigo-300 hover:-translate-y-0.5" do %>
+    Predict Another Product
+  <% end %>
+  <%= link_to history_predictions_path,
+        class: "flex-1 text-center bg-white border-2 border-gray-200 hover:border-indigo-300
+                text-gray-700 hover:text-indigo-600 font-bold py-4 px-6 rounded-2xl
+                transition-all duration-200" do %>
+    View Prediction History
+  <% end %>
+  <%= link_to model_info_predictions_path,
+        class: "flex-1 text-center bg-white border-2 border-gray-200 hover:border-slate-400
+                text-gray-700 hover:text-slate-800 font-bold py-4 px-6 rounded-2xl
+                transition-all duration-200" do %>
+    Model Performance
+  <% end %>
+</div>
