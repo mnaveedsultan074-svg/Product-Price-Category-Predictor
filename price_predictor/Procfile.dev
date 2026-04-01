@@ -1,0 +1,4 @@
+web: bin/rails server -p ${PORT:-3000}
+# tailwindcss:watch exits immediately with tailwindcss-rails 4.x / Tailwind v4 on this setup,
+# which makes Foreman terminate all processes. Rebuild CSS when you change styles:
+#   bin/rails tailwindcss:build
