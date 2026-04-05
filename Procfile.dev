@@ -1,0 +1,10 @@
+# Top-level Procfile to run both services together with foreman.
+# Usage (from project root): foreman start -f Procfile.dev
+#
+# Requires: foreman  (gem install foreman)
+#           Python venv activated in ml/ with requirements installed
+
+ml:  cd ml && python predict_service.py
+web: cd price_predictor && bin/rails server -p ${PORT:-3000}
+# css: removed — tailwindcss:watch exits immediately (Tailwind v4), which stops all Foreman processes.
+# CSS: run `cd price_predictor && bin/rails tailwindcss:build` after style changes.
