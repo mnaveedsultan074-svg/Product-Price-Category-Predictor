@@ -1,0 +1,134 @@
+{
+  "_comment": "Manual test cases for the Price Tier Predictor (Rails form + POST /predict). expected_tier is the label a human would expect from product positioning; the trained model may differ slightly.",
+  "training_price_thresholds_reference": {
+    "currency_note": "Mixed sources (Flipkart ₹ / Amazon $); values are from ml/data/processed/thresholds.json — use as rough tier boundaries for price hints only.",
+    "p25": 91.495,
+    "p50": 200.07,
+    "p75": 436.615,
+    "tier_by_price_percentile": {
+      "budget": "≤ p25",
+      "mid-range": "p25 – p50",
+      "premium": "p50 – p75",
+      "luxury": "> p75"
+    }
+  },
+  "cases": [
+    {
+      "id": "budget-basic-earbuds",
+      "input": {
+        "title": "Basic Wired Earbuds with Mic",
+        "description": "Simple in-ear headphones for calls and music. No-frills packaging. Great for students.",
+        "rating": 3.8,
+        "review_count": 420,
+        "category": "electronics",
+        "price": 12.99
+      },
+      "expected_tier": "budget",
+      "rationale": "Entry-level wording, low implied price, mass-market category."
+    },
+    {
+      "id": "budget-phone-case",
+      "input": {
+        "title": "Clear TPU Phone Case for Budget Android",
+        "description": "Thin protective cover. Value pack. Fits most generic smartphones.",
+        "rating": 4.1,
+        "review_count": 2100,
+        "category": "mobile phones",
+        "price": 8.5
+      },
+      "expected_tier": "budget",
+      "rationale": "Accessory positioned as cheap/value; high review count still compatible with budget volume sellers."
+    },
+    {
+      "id": "mid-range-android",
+      "input": {
+        "title": "Motorola Moto G Power 128GB Unlocked",
+        "description": "Solid mid-range phone with two-day battery, 50MP camera, clean Android experience. Good balance of features and price.",
+        "rating": 4.3,
+        "review_count": 8500,
+        "category": "mobile phones",
+        "price": 199.0
+      },
+      "expected_tier": "mid-range",
+      "rationale": "Explicit mid-range positioning; price near typical p50 band in training thresholds."
+    },
+    {
+      "id": "mid-range-laptop",
+      "input": {
+        "title": "15-inch Laptop 8GB RAM 256GB SSD Windows 11",
+        "description": "Everyday home and office laptop for browsing, video calls, and documents. Reliable mainstream performance.",
+        "rating": 4.0,
+        "review_count": 1200,
+        "category": "computers",
+        "price": 449.0
+      },
+      "expected_tier": "mid-range",
+      "rationale": "Mainstream consumer laptop tier; moderate specs."
+    },
+    {
+      "id": "premium-mirrorless",
+      "input": {
+        "title": "Sony Alpha a6400 Mirrorless Camera with 16-50mm Lens",
+        "description": "APS-C sensor, 4K video, fast autofocus for enthusiasts and content creators stepping up from smartphones.",
+        "rating": 4.7,
+        "review_count": 3200,
+        "category": "cameras",
+        "price": 998.0
+      },
+      "expected_tier": "premium",
+      "rationale": "Enthusiast camera brand and specs; price above p75 in reference thresholds."
+    },
+    {
+      "id": "premium-tablet",
+      "input": {
+        "title": "iPad Air 256GB WiFi 11-inch",
+        "description": "M-series chip, Liquid Retina display, Apple Pencil support. Pro features without flagship Pro pricing.",
+        "rating": 4.8,
+        "review_count": 15000,
+        "category": "electronics",
+        "price": 749.0
+      },
+      "expected_tier": "premium",
+      "rationale": "Premium brand and tier naming; high rating and review volume."
+    },
+    {
+      "id": "luxury-flagship-phone",
+      "input": {
+        "title": "Samsung Galaxy S24 Ultra 512GB Titanium Black",
+        "description": "Flagship smartphone with 200MP camera, S Pen, 5000 mAh battery, AI photo editing, brightest display in the lineup.",
+        "rating": 4.6,
+        "review_count": 12000,
+        "category": "mobile phones",
+        "price": 1299.99
+      },
+      "expected_tier": "luxury",
+      "rationale": "Ultra/flagship naming, top-tier specs; README API example aligns with luxury positioning."
+    },
+    {
+      "id": "luxury-watch",
+      "input": {
+        "title": "Rolex Submariner Date Stainless Steel 41mm",
+        "description": "Iconic Swiss dive watch, certified chronometer, luxury retail with waiting list at authorised dealers.",
+        "rating": 5.0,
+        "review_count": 89,
+        "category": "watches",
+        "price": 14500.0
+      },
+      "expected_tier": "luxury",
+      "rationale": "Ultra-premium luxury product category and price point."
+    },
+    {
+      "id": "edge-budget-keywords-luxury-brand",
+      "input": {
+        "title": "Refurbished iPhone SE 64GB — scratched screen",
+        "description": "Older generation Apple phone sold as budget refurb. Battery health 78%. Cosmetic wear.",
+        "rating": 3.9,
+        "review_count": 400,
+        "category": "mobile phones",
+        "price": 119.0
+      },
+      "expected_tier": "mid-range",
+      "rationale": "Conflicting signals (Apple vs refurb/budget); model may split between mid-range and budget — good edge case."
+    }
+  ]
+}
