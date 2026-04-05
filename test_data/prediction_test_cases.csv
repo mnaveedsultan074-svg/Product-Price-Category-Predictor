@@ -1,0 +1,10 @@
+id,title,description,rating,review_count,category,price,expected_tier,notes
+budget-basic-earbuds,"Basic Wired Earbuds with Mic","Simple in-ear headphones for calls and music. No-frills packaging. Great for students.",3.8,420,electronics,12.99,budget,Entry-level product copy
+budget-phone-case,"Clear TPU Phone Case for Budget Android","Thin protective cover. Value pack. Fits most generic smartphones.",4.1,2100,mobile phones,8.5,budget,Cheap accessory positioning
+mid-range-android,"Motorola Moto G Power 128GB Unlocked","Solid mid-range phone with two-day battery, 50MP camera, clean Android experience. Good balance of features and price.",4.3,8500,mobile phones,199,mid-range,Explicit mid-range + price near p50
+mid-range-laptop,"15-inch Laptop 8GB RAM 256GB SSD Windows 11","Everyday home and office laptop for browsing, video calls, and documents. Reliable mainstream performance.",4,1200,computers,449,mid-range,Mainstream laptop
+premium-mirrorless,"Sony Alpha a6400 Mirrorless Camera with 16-50mm Lens","APS-C sensor, 4K video, fast autofocus for enthusiasts and content creators stepping up from smartphones.",4.7,3200,cameras,998,premium,Enthusiast camera tier
+premium-tablet,"iPad Air 256GB WiFi 11-inch","M-series chip, Liquid Retina display, Apple Pencil support. Pro features without flagship Pro pricing.",4.8,15000,electronics,749,premium,Premium tablet tier
+luxury-flagship-phone,"Samsung Galaxy S24 Ultra 512GB Titanium Black","Flagship smartphone with 200MP camera, S Pen, 5000 mAh battery, AI photo editing, brightest display in the lineup.",4.6,12000,mobile phones,1299.99,luxury,Same scenario as README API example
+luxury-watch,"Rolex Submariner Date Stainless Steel 41mm","Iconic Swiss dive watch, certified chronometer, luxury retail with waiting list at authorised dealers.",5,89,watches,14500,luxury,Ultra-luxury price band
+edge-refurb-iphone,"Refurbished iPhone SE 64GB — scratched screen","Older generation Apple phone sold as budget refurb. Battery health 78%. Cosmetic wear.",3.9,400,mobile phones,119,mid-range,Edge case: mixed budget + premium brand
