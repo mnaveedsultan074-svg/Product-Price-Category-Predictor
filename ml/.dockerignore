@@ -1,0 +1,22 @@
+# Python / tooling
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# VCS / editor
+.git/
+.gitignore
+.idea/
+.claude/
+
+# Logs / scratch
+*.log

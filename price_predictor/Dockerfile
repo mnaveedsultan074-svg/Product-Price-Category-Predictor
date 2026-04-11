@@ -1,29 +1,31 @@
-# syntax = docker/dockerfile:1
+# syntax=docker/dockerfile:1
 
 # Make sure RUBY_VERSION matches the Ruby version in .ruby-version and Gemfile
 ARG RUBY_VERSION=3.3.4
-FROM registry.docker.com/library/ruby:$RUBY_VERSION-slim as base
+FROM ruby:${RUBY_VERSION}-slim AS base
 
 # Rails app lives here
 WORKDIR /rails
 
-# Set production environment
+# Set production environment (groups excluded via `bundle config` in build stage)
 ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
-    BUNDLE_PATH="/usr/local/bundle" \
-    BUNDLE_WITHOUT="development"
+    BUNDLE_PATH="/usr/local/bundle"
 
 
 # Throw-away build stage to reduce size of final image
-FROM base as build
+FROM base AS build
 
 # Install packages needed to build gems
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git pkg-config
+    apt-get install --no-install-recommends -y build-essential git pkg-config && \
+    rm -rf /var/lib/apt/lists/*
 
-# Install application gems
+# Install application gems (Bundler 2.4+ — avoid deprecated `bundle install --without`)
 COPY Gemfile Gemfile.lock ./
-RUN bundle install && \
+RUN bundle config set --local deployment 'true' && \
+    bundle config set --local without 'development test' && \
+    bundle install && \
     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
     bundle exec bootsnap precompile --gemfile
 
@@ -57,7 +59,9 @@ RUN useradd rails --create-home --shell /bin/bash && \
     chown -R rails:rails db log storage tmp
 USER rails:rails
 
-# Entrypoint prepares the database.
+# Prepare DB then exec command. Production SQLite lives under storage/; the named
+# volume `rails_storage` hides any DB baked into the image, so db:prepare runs
+# on first boot to create storage/production.sqlite3.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
 # Start the server by default, this can be overwritten at runtime

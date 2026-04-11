@@ -6,8 +6,12 @@ __pycache__/
 *.pyc
 *.pyo
 
-# Documentation & dissertation binaries (excluded from repo)
-*.md
+# Local secrets (never commit)
+.env
+.env.local
+.env.*.local
+
+# Optional dissertation binaries (large); README and docs/*.md are tracked
 *.pdf
 *.docx
 

@@ -1,7 +1,9 @@
 #!/bin/bash -e
 
-# If running the rails server then create or migrate existing database
-if [ "${1}" == "./bin/rails" ] && [ "${2}" == "server" ]; then
+# If starting the web server, ensure DB exists. Production uses SQLite under
+# storage/; with a fresh named volume that directory is empty, so migrations
+# must run before Puma/Rails serves traffic.
+if [ "${1}" = "./bin/rails" ] && [ "${2}" = "server" ]; then
   ./bin/rails db:prepare
 fi
 

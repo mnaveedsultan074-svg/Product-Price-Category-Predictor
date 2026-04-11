@@ -1,48 +1,29 @@
 # ============================================================
-# Product Price Category Predictor - Docker Compose (local build)
-# ============================================================
+# Same stack as docker-compose.yml but pulls pre-built images
+# from Docker Hub (no local `build:`). Set DOCKERHUB_USER first.
 #
-# Services:
-#   ml   - Python Flask ML micro-service  (port 5001)
-#   web  - Ruby on Rails web application  (port 3000)
+#   export DOCKERHUB_USER=isammalik   # your Docker Hub username
+#   docker compose -f docker-compose.hub.yml pull
+#   docker compose -f docker-compose.hub.yml up
 #
-# Quick start:
-#   cp .env.example .env          # fill in KAGGLE_USERNAME / KAGGLE_KEY, RAILS_MASTER_KEY
-#   docker compose up --build
-#
-# Pre-built images from Docker Hub:
-#   export DOCKERHUB_USER=your-dockerhub-username
-#   docker compose -f docker-compose.hub.yml pull && docker compose -f docker-compose.hub.yml up
-#
-# The ML service runs the full pipeline on first boot:
-#   download_data  ->  preprocess  ->  train  ->  serve
-# Subsequent boots skip data download/training (volumes are persisted).
-#
-# Rails production DB is SQLite at storage/production.sqlite3. The named volume
-# rails_storage replaces the image copy of storage/, so bin/docker-entrypoint
-# runs `rails db:prepare` before the server starts on first boot.
+# Images must be public on Docker Hub for anonymous `docker pull`, or you must
+# `docker login` first for private repos.
 # ============================================================
 
 services:
 
-  # -- Python ML micro-service ------------------------------
   ml:
-    build:
-      context: ./ml
-      dockerfile: Dockerfile
+    image: ${DOCKERHUB_USER:?Set DOCKERHUB_USER to your Docker Hub username}/product-price-predictor-ml-api:latest
     container_name: price_predictor_ml
     restart: unless-stopped
     ports:
       - "${ML_PORT:-5001}:5001"
     volumes:
-      # Source code (live-reload in dev)
       - ./ml:/app
-      # Persist trained models between container restarts
       - ml_models:/app/models
-      # Persist downloaded datasets
       - ml_data:/app/data
     env_file:
-      - .env.example          # override with .env in production
+      - .env.example
     environment:
       ML_PORT: "${ML_PORT:-5001}"
       PYTHONUNBUFFERED: "1"
@@ -60,13 +41,10 @@ services:
       interval: 30s
       timeout: 10s
       retries: 10
-      start_period: 180s     # training can take a few minutes on first run
+      start_period: 180s
 
-  # -- Ruby on Rails web app ---------------------------------
   web:
-    build:
-      context: ./price_predictor
-      dockerfile: Dockerfile
+    image: ${DOCKERHUB_USER:?Set DOCKERHUB_USER to your Docker Hub username}/product-price-predictor-rails-app:latest
     container_name: price_predictor_web
     restart: unless-stopped
     ports:
