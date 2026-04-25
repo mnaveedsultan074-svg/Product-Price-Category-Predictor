@@ -77,7 +77,8 @@ services:
     environment:
       RAILS_ENV: "production"
       ML_SERVICE_URL: "http://ml:${ML_PORT:-5001}"
-      RAILS_MASTER_KEY: "${RAILS_MASTER_KEY}"
+     # RAILS_MASTER_KEY: "${RAILS_MASTER_KEY}"
+     RAILS_MASTER_KEY: "92b7bcb0089a1c4564291c3e345ebef074028d16a357429f127f3edb9099baaa0e4a50fdba28c3a518a07609418a9dae97ef8f40c05154d100808d965e9a7b"
       RAILS_LOG_TO_STDOUT: "true"
     volumes:
       - rails_storage:/rails/storage
