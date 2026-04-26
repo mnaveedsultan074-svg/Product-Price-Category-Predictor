@@ -41,7 +41,8 @@ Rails.application.configure do
   # config.assume_ssl = true
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  config.force_ssl = true
+  # Set RAILS_FORCE_SSL=false when running behind HTTP only (e.g. local docker compose on localhost).
+  config.force_ssl = ActiveModel::Type::Boolean.new.cast(ENV.fetch("RAILS_FORCE_SSL", "true"))
 
   # Log to STDOUT by default
   config.logger = ActiveSupport::Logger.new(STDOUT)

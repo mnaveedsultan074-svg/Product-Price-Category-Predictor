@@ -6,5 +6,5 @@
 
 ml:  cd ml && python predict_service.py
 web: cd price_predictor && bin/rails server -p ${PORT:-3000}
-# css: removed — tailwindcss:watch exits immediately (Tailwind v4), which stops all Foreman processes.
+# css: removed - tailwindcss:watch exits immediately (Tailwind v4), which stops all Foreman processes.
 # CSS: run `cd price_predictor && bin/rails tailwindcss:build` after style changes.
